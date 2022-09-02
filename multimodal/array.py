@@ -90,14 +90,12 @@ class MultiModalArray:
             return None, None
         return new_windows, new_names
 
-
     def __getitem__(self, key) -> np.ndarray:
         arr = self._array[key]
         if np.isscalar(arr):
             return arr
         windows, names = self.__remove_invalid_windows(arr.shape, self._windows, self._names)
         return MultiModalArray(arr, windows, names=names)
-
 
     def __setitem__(self, key, value):
         return self._array.__setitem__(key, value)
@@ -109,6 +107,8 @@ class MultiModalArray:
             slice_strs.append(s)
         return ", ".join(slice_strs)
 
+    def __len__(self) -> int:
+        return len(self._array)
 
     def __repr__(self) -> str:
         return str(self)

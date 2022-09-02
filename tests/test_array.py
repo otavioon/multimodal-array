@@ -13,6 +13,10 @@ def simple_transform(X: np.ndarray):
 def simple_transform_2(X: np.ndarray):
     return np.expand_dims(np.ones(X.shape[0]), axis=1)
 
+def test_len():
+    x = generate_array((4, 4))
+    array = MultiModalArray(x)
+    assert len(array) == len(x), "Length of array mismatch"
 
 def test_window_slice_get():
     windows = [

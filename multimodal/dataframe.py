@@ -89,6 +89,9 @@ class MultiModalDataframe:
             slice_strs.append(s)
         return ", ".join(slice_strs)
 
+    def __len__(self) -> int:
+        return len(self._df)
+
     def __repr__(self) -> str:
         return str(self)
 
