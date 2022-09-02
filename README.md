@@ -7,7 +7,7 @@ Several datasets are composed by multi-modal samples. A multi modal sample is a 
 MultiModalArray package allow segmenting samples of 1-D and 2-D arrays into windows, that is, collections of columns of the same nature.
 An example is shown in Figure below. An numpy array of shape (6, 12), may have 4 windows each window with 3 columns.
 
-![Multimodal dataset](./img/windowed-dataset.svg)
+![Multimodal dataset](./img/windowed-dataset.png)
 
 MultiModalArray provide some features such as:
 
