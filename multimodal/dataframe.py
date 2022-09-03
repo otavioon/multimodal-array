@@ -69,7 +69,7 @@ class MultiModalDataframe:
                 return df
 
             return MultiModalDataframe(
-                df
+                df,
                 windows=None,
                 names=[name]
             )
