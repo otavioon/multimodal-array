@@ -5,7 +5,36 @@ from functools import partial
 
 pandas_column_stack = partial(pd.concat, axis=1)
 
+def remove_invalid_windows(columns: List[str], windows: List[slice], names: List[str], axis: int = -1):
+    new_windows, new_names = [], []
+    for i in range(len(windows)):
+        window, name = windows[i], names[i]
+        if all(w in columns for w in window):
+            new_windows.append(window)
+            new_names.append(name)
+    if len(new_windows) == 0:
+        return None, None
+    return new_windows, new_names
+
 class MultiModalDataframe:
+    class ILoc:
+        def __init__(self, obj_ref: "MultiModalDataframe"):
+            self.obj_ref = obj_ref
+
+        def __getitem__(self, index):
+            df = pd.DataFrame(self.obj_ref.data.iloc[index])
+            windows, names = remove_invalid_windows(list(df.columns), self.obj_ref.window_slices, self.obj_ref.window_names)
+            return MultiModalDataframe(df, windows=windows, names=names)
+
+    class Loc:
+        def __init__(self, obj_ref: "MultiModalDataframe"):
+            self.obj_ref = obj_ref
+
+        def __getitem__(self, index):
+            df = pd.DataFrame(self.obj_ref.data.loc[index])
+            windows, names = remove_invalid_windows(list(df.columns), self.obj_ref.window_slices, self.obj_ref.window_names)
+            return MultiModalDataframe(df, windows=windows, names=names)
+
     class WindowSlice:
         def __init__(self, obj_ref: "MultiModalDataframe"):
             self.obj_ref = obj_ref
@@ -25,7 +54,7 @@ class MultiModalDataframe:
                 name = self.obj_ref.window_names[index]
 
             return MultiModalDataframe(
-                self.obj_ref.data[self.__getslice(index)],
+                pd.DataFrame(self.obj_ref.data[self.__getslice(index)]),
                 windows=None,
                 names=[name]
             )
@@ -55,6 +84,14 @@ class MultiModalDataframe:
         return self._names
 
     @property
+    def iloc(self):
+        return MultiModalDataframe.ILoc(self)
+
+    @property
+    def loc(self):
+        return MultiModalDataframe.Loc(self)
+
+    @property
     def data(self) -> pd.DataFrame:
         return self._df
 
@@ -62,21 +99,9 @@ class MultiModalDataframe:
     def window_loc(self):
         return MultiModalDataframe.WindowSlice(self)
 
-    @staticmethod
-    def __remove_invalid_windows(columns: List[str], windows: List[slice], names: List[str], axis: int = -1):
-        new_windows, new_names = [], []
-        for i in range(len(windows)):
-            window, name = windows[i], names[i]
-            if all(w in columns for w in window):
-                new_windows.append(window)
-                new_names.append(name)
-        if len(new_windows) == 0:
-            return None, None
-        return new_windows, new_names
-
     def __getitem__(self, key) -> pd.DataFrame:
         df = pd.DataFrame(self._df[key])
-        windows, names = self.__remove_invalid_windows(list(df.columns), self._windows, self._names)
+        windows, names = remove_invalid_windows(list(df.columns), self._windows, self._names)
         return MultiModalDataframe(df, windows=windows, names=names)
 
     def __setitem__(self, key, value):
