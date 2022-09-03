@@ -16,13 +16,19 @@ def remove_invalid_windows(columns: List[str], windows: List[slice], names: List
         return None, None
     return new_windows, new_names
 
+def convert_series_to_frame(df):
+    if isinstance(df, pd.core.series.Series):
+        return df.to_frame().T
+    else:
+        return df
+
 class MultiModalDataframe:
     class ILoc:
         def __init__(self, obj_ref: "MultiModalDataframe"):
             self.obj_ref = obj_ref
 
         def __getitem__(self, index):
-            df = pd.DataFrame(self.obj_ref.data.iloc[index])
+            df = convert_series_to_frame(self.obj_ref.data.iloc[index])
             windows, names = remove_invalid_windows(list(df.columns), self.obj_ref.window_slices, self.obj_ref.window_names)
             return MultiModalDataframe(df, windows=windows, names=names)
 
@@ -31,7 +37,7 @@ class MultiModalDataframe:
             self.obj_ref = obj_ref
 
         def __getitem__(self, index):
-            df = pd.DataFrame(self.obj_ref.data.loc[index])
+            df = convert_series_to_frame(self.obj_ref.data.loc[index])
             windows, names = remove_invalid_windows(list(df.columns), self.obj_ref.window_slices, self.obj_ref.window_names)
             return MultiModalDataframe(df, windows=windows, names=names)
 
@@ -54,7 +60,7 @@ class MultiModalDataframe:
                 name = self.obj_ref.window_names[index]
 
             return MultiModalDataframe(
-                pd.DataFrame(self.obj_ref.data[self.__getslice(index)]),
+                convert_series_to_frame(self.obj_ref.data[self.__getslice(index)]),
                 windows=None,
                 names=[name]
             )
@@ -100,7 +106,7 @@ class MultiModalDataframe:
         return MultiModalDataframe.WindowSlice(self)
 
     def __getitem__(self, key) -> pd.DataFrame:
-        df = pd.DataFrame(self._df[key])
+        df = convert_series_to_frame(self._df[key])
         windows, names = remove_invalid_windows(list(df.columns), self._windows, self._names)
         return MultiModalDataframe(df, windows=windows, names=names)
 
