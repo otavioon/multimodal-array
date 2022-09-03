@@ -2,6 +2,7 @@ from typing import List, Tuple, Union, Iterable
 import numpy as np
 import pandas as pd
 from functools import partial
+from pandas.api.types import is_scalar
 
 pandas_column_stack = partial(pd.concat, axis=1)
 
@@ -29,6 +30,8 @@ class MultiModalDataframe:
 
         def __getitem__(self, index):
             df = convert_series_to_frame(self.obj_ref.data.iloc[index])
+            if is_scalar(df):
+                return df
             windows, names = remove_invalid_windows(list(df.columns), self.obj_ref.window_slices, self.obj_ref.window_names)
             return MultiModalDataframe(df, windows=windows, names=names)
 
@@ -38,6 +41,8 @@ class MultiModalDataframe:
 
         def __getitem__(self, index):
             df = convert_series_to_frame(self.obj_ref.data.loc[index])
+            if is_scalar(df):
+                return df
             windows, names = remove_invalid_windows(list(df.columns), self.obj_ref.window_slices, self.obj_ref.window_names)
             return MultiModalDataframe(df, windows=windows, names=names)
 
@@ -59,8 +64,12 @@ class MultiModalDataframe:
             elif isinstance(index, int):
                 name = self.obj_ref.window_names[index]
 
+            df = convert_series_to_frame(self.obj_ref.data[self.__getslice(index)])
+            if is_scalar(df):
+                return df
+
             return MultiModalDataframe(
-                convert_series_to_frame(self.obj_ref.data[self.__getslice(index)]),
+                df
                 windows=None,
                 names=[name]
             )
@@ -107,6 +116,8 @@ class MultiModalDataframe:
 
     def __getitem__(self, key) -> pd.DataFrame:
         df = convert_series_to_frame(self._df[key])
+        if is_scalar(df):
+            return df
         windows, names = remove_invalid_windows(list(df.columns), self._windows, self._names)
         return MultiModalDataframe(df, windows=windows, names=names)
 
