@@ -167,6 +167,5 @@ def apply_func(func: callable, mdf: MultiModalDataframe, squeeze: bool = True):
     if squeeze:
         input_data = input_data.squeeze()
 
-    columns = [mdf.data.columns[i] for i in range(res.shape[-1])]
-    res = pd.DataFrame(func(input_data), columns=columns)
+    res = pd.DataFrame(func(input_data), columns=mdf.data.columns)
     return MultiModalDataframe(res, windows=mdf.window_slices, names=mdf.window_names)
