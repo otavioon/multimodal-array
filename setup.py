@@ -14,7 +14,7 @@ def parse_requirements_txt(filename: str) -> List[str]:
 long_description = "Multimodal array allows handling multimodal numpy array and dataframes"
 
 setup(name='multimodal_array',
-      version='0.0.2',
+      version='0.0.1',
       description='A multimodal array interface',
       author='otavio.napoli',
       author_email='onapoli@lmcad.ic.unicamp.br',
