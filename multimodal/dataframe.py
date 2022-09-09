@@ -141,13 +141,15 @@ class MultiModalDataframe:
         return f"{str(self._df)}\nWindows: [{self.__pprint_window_slices()}]"
 
 
-def apply_multimodal_dataframe_func(func: callable, mdf: MultiModalDataframe, collate_fn: callable = pandas_column_stack):
+def apply_multimodal_dataframe_func(func: callable, mdf: MultiModalDataframe, collate_fn: callable = pandas_column_stack, squeeze: bool = True):
     dfs = []
     windows = []
     names = []
     start = 0
     for i in range(mdf.num_windows):
-        data = mdf.window_loc[i].data
+        data = mdf.window_loc[i].data.values
+        if squeeze:
+            data = data.squeeze()
         res = func(data)
         columns = [data.columns[i] for i in range(res.shape[-1])]
         res = pd.DataFrame(res, columns=columns)
