@@ -147,10 +147,11 @@ def apply_multimodal_dataframe_func(func: callable, mdf: MultiModalDataframe, co
     names = []
     start = 0
     for i in range(mdf.num_windows):
-        data = mdf.window_loc[i].data.values
+        data = mdf.window_loc[i].data
+        input_data = data.values
         if squeeze:
-            data = data.squeeze()
-        res = func(data)
+            input_data = input_data.squeeze()
+        res = func(input_data)
         columns = [data.columns[i] for i in range(res.shape[-1])]
         res = pd.DataFrame(res, columns=columns)
         dfs.append(res)
